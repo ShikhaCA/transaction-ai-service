@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+pymysql
+requests
+pydantic
+python-multipart
+python-dotenv
+prometheus-fastapi-instrumentator
+python-json-logger
+passlib[bcrypt]
+bcrypt==4.0.1
+python-jose[cryptography]

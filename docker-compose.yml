@@ -1,0 +1,100 @@
+version: '3.9'
+
+services:
+
+  mysql:
+    image: mysql:8
+    container_name: mysql-container
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: transaction_db
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    restart: always
+
+
+  redis:
+    image: redis:7
+    container_name: redis-container
+
+    ports:
+      - "6379:6379"
+
+    restart: always
+
+
+  weaviate:
+    image: semitechnologies/weaviate:latest
+    container_name: weaviate-container
+
+    ports:
+      - "8080:8080"
+      - "50051:50051"
+
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'none'
+      CLUSTER_HOSTNAME: 'node1'
+
+    restart: always
+
+
+  api-service:
+    build: ./api-service
+    container_name: api-service-container
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env
+
+    depends_on:
+      - mysql
+      - ai-report-service
+
+    restart: always
+
+
+  ai-report-service:
+    build: ./ai-report-service
+    container_name: ai-report-service-container
+
+    ports:
+      - "8001:8001"
+
+    env_file:
+      - .env
+
+    depends_on:
+      - mysql
+      - weaviate
+      - redis
+
+    restart: always
+
+
+  worker-service:
+    build: ./worker-service
+    container_name: worker-service-container
+
+    env_file:
+      - .env
+
+    depends_on:
+      - redis
+      - ai-report-service
+
+    restart: always
+
+
+volumes:
+  mysql_data:

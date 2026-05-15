@@ -1,0 +1,9 @@
+celery
+redis
+langchain
+langchain-community
+langchain-huggingface
+langchain-weaviate
+weaviate-client
+sentence-transformers
+pypdf
