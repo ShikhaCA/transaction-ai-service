@@ -1,1 +1,56 @@
 
+name: Docker CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ================================
+      # CHECKOUT CODE
+      # ================================
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+
+      # ================================
+      # SETUP DOCKER BUILDX
+      # ================================
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+
+      # ================================
+      # BUILD API SERVICE
+      # ================================
+      - name: Build API Service
+        run: docker build ./api-service -t api-service
+
+
+      # ================================
+      # BUILD AI REPORT SERVICE
+      # ================================
+      - name: Build AI Report Service
+        run: docker build ./ai-report-service -t ai-report-service
+
+
+      # ================================
+      # BUILD WORKER SERVICE
+      # ================================
+      - name: Build Worker Service
+        run: docker build ./worker-service -t worker-service
+
+
+      # ================================
+      # SUCCESS MESSAGE
+      # ================================
+      - name: CI Success
+        run: echo "Docker images built successfully"

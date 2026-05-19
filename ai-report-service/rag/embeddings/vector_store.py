@@ -1,9 +1,10 @@
+import os
 import re
 import uuid
-import os
 import weaviate
 
 from weaviate.classes.init import Auth
+
 from langchain_weaviate import WeaviateVectorStore
 from langchain_huggingface import HuggingFaceEmbeddings
 
@@ -33,16 +34,15 @@ client = weaviate.connect_to_weaviate_cloud(
     )
 )
 
-<<<<<<< HEAD
-client.connect()
-=======
->>>>>>> 0e10a77 (Weaviate Cloud updated)
 
+# ================================
+# COLLECTION NAME
+# ================================
 INDEX_NAME = "TransactionDocs"
 
 
 # ================================
-# STORE DOCUMENTS
+# DOCUMENT STORE
 # ================================
 uploaded_documents = []
 
@@ -56,20 +56,15 @@ def clean_metadata(metadata):
 
     for key, value in metadata.items():
 
+        # REMOVE INVALID CHARACTERS
         new_key = re.sub(
-            r'[^A-Za-z0-9_]',
-            '_',
+            r"[^A-Za-z0-9_]",
+            "_",
             key
         )
 
-<<<<<<< HEAD
-        if not re.match(r'^[A-Za-z_]', new_key):
-=======
-        if not re.match(
-            r'^[A-Za-z_]',
-            new_key
-        ):
->>>>>>> 0e10a77 (Weaviate Cloud updated)
+        # ENSURE VALID START CHARACTER
+        if not re.match(r"^[A-Za-z_]", new_key):
             new_key = f"field_{new_key}"
 
         cleaned[new_key] = str(value)
@@ -78,41 +73,73 @@ def clean_metadata(metadata):
 
 
 # ================================
-# STORE EMBEDDINGS
+# CREATE COLLECTION IF NOT EXISTS
 # ================================
-def store_embeddings(chunks, filename="unknown"):
+def create_collection():
 
-    for chunk in chunks:
+    existing = client.collections.list_all()
 
-        chunk.metadata = clean_metadata(
-            chunk.metadata
+    if INDEX_NAME not in existing:
+
+        client.collections.create(
+            name=INDEX_NAME
         )
 
-        chunk.metadata["document_name"] = filename
+        print(f"\nCollection created: {INDEX_NAME}")
 
-<<<<<<< HEAD
-=======
-    print(f"\nUploading {len(chunks)} chunks to Weaviate")
->>>>>>> 0e10a77 (Weaviate Cloud updated)
+    else:
 
-    WeaviateVectorStore.from_documents(
-        documents=chunks,
-        embedding=embedding_model,
-        client=client,
-        index_name=INDEX_NAME,
-        text_key="text"
-    )
+        print(f"\nCollection already exists: {INDEX_NAME}")
 
-    uploaded_documents.append({
-        "id": str(uuid.uuid4()),
-        "filename": filename
-    })
 
-    print("\nEmbeddings stored successfully")
+# CREATE COLLECTION ON STARTUP
+create_collection()
 
 
 # ================================
-# LOAD VECTOR DATABASE
+# STORE EMBEDDINGS
+# ================================
+def store_embeddings(
+    chunks,
+    filename="unknown"
+):
+
+    try:
+
+        for chunk in chunks:
+
+            chunk.metadata = clean_metadata(
+                chunk.metadata
+            )
+
+            chunk.metadata["document_name"] = filename
+
+        print(f"\nUploading {len(chunks)} chunks...")
+
+        WeaviateVectorStore.from_documents(
+            documents=chunks,
+            embedding=embedding_model,
+            client=client,
+            index_name=INDEX_NAME,
+            text_key="text"
+        )
+
+        uploaded_documents.append({
+            "id": str(uuid.uuid4()),
+            "filename": filename
+        })
+
+        print("\nEmbeddings stored successfully")
+
+    except Exception as e:
+
+        print(f"\nEmbedding storage error: {e}")
+
+        raise e
+
+
+# ================================
+# LOAD VECTOR DB
 # ================================
 def load_vector_db():
 
