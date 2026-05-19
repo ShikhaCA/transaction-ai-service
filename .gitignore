@@ -1,12 +1,8 @@
 .env
+
 __pycache__/
 *.pyc
 venv/
-<<<<<<< HEAD
-.env
-__pycache__/
-*.pyc
-=======
 
 # VS Code
 .vscode/
@@ -35,5 +31,3 @@ uploads/
 
 # Cache
 .cache/
- 
->>>>>>> 0e10a77 (Weaviate Cloud updated)
