@@ -1,9 +1,9 @@
 import re
 import uuid
+import os
 import weaviate
 
-from weaviate.connect import ConnectionParams
-
+from weaviate.classes.init import Auth
 from langchain_weaviate import WeaviateVectorStore
 from langchain_huggingface import HuggingFaceEmbeddings
 
@@ -17,16 +17,26 @@ embedding_model = HuggingFaceEmbeddings(
 
 
 # ================================
+# WEAVIATE CONFIG
+# ================================
+WEAVIATE_URL = os.getenv("WEAVIATE_URL")
+WEAVIATE_API_KEY = os.getenv("WEAVIATE_API_KEY")
+
+
+# ================================
 # WEAVIATE CLIENT
 # ================================
-client = weaviate.WeaviateClient(
-    connection_params=ConnectionParams.from_url(
-        url="http://weaviate:8080",
-        grpc_port=50051
+client = weaviate.connect_to_weaviate_cloud(
+    cluster_url=WEAVIATE_URL,
+    auth_credentials=Auth.api_key(
+        WEAVIATE_API_KEY
     )
 )
 
+<<<<<<< HEAD
 client.connect()
+=======
+>>>>>>> 0e10a77 (Weaviate Cloud updated)
 
 INDEX_NAME = "TransactionDocs"
 
@@ -52,7 +62,14 @@ def clean_metadata(metadata):
             key
         )
 
+<<<<<<< HEAD
         if not re.match(r'^[A-Za-z_]', new_key):
+=======
+        if not re.match(
+            r'^[A-Za-z_]',
+            new_key
+        ):
+>>>>>>> 0e10a77 (Weaviate Cloud updated)
             new_key = f"field_{new_key}"
 
         cleaned[new_key] = str(value)
@@ -73,6 +90,10 @@ def store_embeddings(chunks, filename="unknown"):
 
         chunk.metadata["document_name"] = filename
 
+<<<<<<< HEAD
+=======
+    print(f"\nUploading {len(chunks)} chunks to Weaviate")
+>>>>>>> 0e10a77 (Weaviate Cloud updated)
 
     WeaviateVectorStore.from_documents(
         documents=chunks,
@@ -86,6 +107,8 @@ def store_embeddings(chunks, filename="unknown"):
         "id": str(uuid.uuid4()),
         "filename": filename
     })
+
+    print("\nEmbeddings stored successfully")
 
 
 # ================================

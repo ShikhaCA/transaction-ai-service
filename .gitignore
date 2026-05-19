@@ -2,6 +2,39 @@
 __pycache__/
 *.pyc
 venv/
+<<<<<<< HEAD
 .env
 __pycache__/
 *.pyc
+=======
+.env/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Database
+*.db
+
+# FAISS / Embeddings
+faiss_index/
+*.faiss
+*.pkl
+
+# Temp files
+temp_*
+uploads/
+
+# Docker
+*.tar
+
+# Cache
+.cache/
+ 
+>>>>>>> 0e10a77 (Weaviate Cloud updated)

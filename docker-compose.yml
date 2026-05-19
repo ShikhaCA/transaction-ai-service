@@ -1,10 +1,18 @@
+<<<<<<< HEAD
 version: '3.9'
+=======
+version: "3.9"
+>>>>>>> 0e10a77 (Weaviate Cloud updated)
 
 services:
 
+  # ================================
+  # MYSQL
+  # ================================
   mysql:
     image: mysql:8
     container_name: mysql-container
+    restart: always
 
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -16,40 +24,29 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
-    restart: always
 
-
+  # ================================
+  # REDIS
+  # ================================
   redis:
     image: redis:7
     container_name: redis-container
+    restart: always
 
     ports:
       - "6379:6379"
 
-    restart: always
 
-
-  weaviate:
-    image: semitechnologies/weaviate:latest
-    container_name: weaviate-container
-
-    ports:
-      - "8080:8080"
-      - "50051:50051"
-
-    environment:
-      QUERY_DEFAULTS_LIMIT: 25
-      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
-      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
-      DEFAULT_VECTORIZER_MODULE: 'none'
-      CLUSTER_HOSTNAME: 'node1'
-
-    restart: always
-
-
+  # ================================
+  # API SERVICE
+  # ================================
   api-service:
-    build: ./api-service
+    build:
+      context: ./api-service
+
     container_name: api-service-container
+
+    restart: always
 
     ports:
       - "8000:8000"
@@ -59,14 +56,22 @@ services:
 
     depends_on:
       - mysql
-      - ai-report-service
+      - redis
+
+    volumes:
+      - uploads_data:/app/uploads
+
+
+  # ================================
+  # AI REPORT SERVICE
+  # ================================
+  ai-report-service:
+    build:
+      context: ./ai-report-service
+
+    container_name: ai-report-service-container
 
     restart: always
-
-
-  ai-report-service:
-    build: ./ai-report-service
-    container_name: ai-report-service-container
 
     ports:
       - "8001:8001"
@@ -75,16 +80,25 @@ services:
       - .env
 
     depends_on:
-      - mysql
-      - weaviate
       - redis
+
+    volumes:
+      - uploads_data:/app/uploads
+
+
+  # ================================
+  # WORKER SERVICE
+  # ================================
+  worker-service:
+    build:
+      context: ./worker-service
+
+    container_name: worker-service-container
 
     restart: always
 
-
-  worker-service:
-    build: ./worker-service
-    container_name: worker-service-container
+    env_file:
+      - .env
 
     env_file:
       - .env
@@ -93,8 +107,19 @@ services:
       - redis
       - ai-report-service
 
-    restart: always
+    volumes:
+      - uploads_data:/app/uploads
 
 
+# ================================
+# VOLUMES
+# ================================
 volumes:
+<<<<<<< HEAD
   mysql_data:
+=======
+
+  mysql_data:
+
+  uploads_data:
+>>>>>>> 0e10a77 (Weaviate Cloud updated)
